@@ -11,30 +11,23 @@ if [ ! -x "$PY" ]; then
     exit 1
 fi
 
-# The shard count comes from the job script's array range, so the two can't disagree.
-NSHARDS=$(( $(sed -nE 's/^#PBS -J 0-([0-9]+).*/\1/p' "$REPO/jobs/vimdf_shards.pbs") + 1 ))
 OUT_DIR="$("$PY" -c 'import vimdf; print(vimdf.OUT_DIR)')"
+N_YEARS="$("$PY" -c 'import vimdf; print(len(vimdf.years()))')"
+MISSING="$("$PY" -c 'import os, vimdf; print(" ".join(str(y) for y in vimdf.years() if not os.path.isfile(vimdf.year_path(y))))')"
 
-missing=()
-for ((i = 0; i < NSHARDS; i++)); do
-    f=$(printf "%s/shard_%03d_of_%03d.nc" "$OUT_DIR" "$i" "$NSHARDS")
-    [ -f "$f" ] || missing+=("$i")
-done
-if [ ${#missing[@]} -gt 0 ]; then
-    echo "missing ${#missing[@]} of $NSHARDS shards: ${missing[*]}" >&2
-    echo "resubmit the array; shards that already finished exit immediately:" >&2
-    echo "  ./submit.sh <your-project-code>" >&2    
+if [ -n "$MISSING" ]; then
+    echo "missing year files: $MISSING" >&2
+    echo "resubmit the array; years already written are skipped:" >&2
+    echo "  ./submit.sh <your-project-code>" >&2
     exit 1
 fi
 
 if ls "$OUT_DIR"/*.tmp >/dev/null 2>&1; then
-    echo "warning: leftover .tmp files in $OUT_DIR from an interrupted shard" >&2
+    echo "warning: leftover .tmp files in $OUT_DIR from an interrupted year" >&2
 fi
 
-echo "all $NSHARDS shards present"
+echo "all $N_YEARS year files present in $OUT_DIR"
 if ls "$REPO"/logs/* >/dev/null 2>&1; then
     echo "missing-file skips reported by shards:"
     grep -h "days skipped for missing files" "$REPO"/logs/* || echo "  (none found in logs)"
 fi
-
-"$PY" vimdf.py combine

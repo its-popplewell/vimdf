@@ -24,7 +24,7 @@ if [ ! -d "$VENV" ]; then
     "$PYTHON" -m venv "$VENV"
 fi
 "$VENV/bin/pip" install --quiet --upgrade pip
-"$VENV/bin/pip" install --quiet numpy pandas xarray h5netcdf netCDF4
+"$VENV/bin/pip" install --quiet numpy pandas xarray h5netcdf netCDF4 h5py
 
 mkdir -p "$REPO/logs"
 OUT_DIR="$("$VENV/bin/python" -c 'import os, vimdf; os.makedirs(vimdf.OUT_DIR, exist_ok=True); print(vimdf.OUT_DIR)')"
