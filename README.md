@@ -5,6 +5,7 @@ I have verified the code and tested it.
 
 ## Running Directions
 It should work by just:
-- running `./setup.sh` 
+- running `./setup.sh`
+- updating the box and time and whatnot in `vimdf.py` 
 - running `./submit <ncar-project-id>`
 - running `./finish.sh` after all the shards are complete
