@@ -1,0 +1,11 @@
+#!/bin/bash
+#PBS -N vimdf_shards
+#PBS -q casper
+#PBS -l select=1:ncpus=2:mem=32GB
+#PBS -l walltime=06:00:00
+#PBS -J 0-15
+#PBS -j oe
+
+cd "$PBS_O_WORKDIR"
+source .venv/bin/activate
+python vimdf.py run "$PBS_ARRAY_INDEX" 16
